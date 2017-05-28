@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Snake</title>
+  </head>
+  <body>
+    <canvas id = "canvas" width = "400" height = "400"></canvas>
+    
+    <script>
+      window.onload = function(){
+        canvas = document.getElementById("canvas");
+        ctx = canvas.getContext("2d");
+        document.addEventListener("keydown",keyPush);
+        setInterval(game, 1000/15);
+      }
+      // [
+      //   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+      //   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+      //   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+      //   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+      //   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+      //   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+      //   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+      //   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+      //   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+      //   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+      //   [0,0,0,0,0,0,0,0,0,0,S,0,0,0,0,0,0,0,0,0,0]
+      //   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+      //   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+      //   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+      //   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+      //   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,A,0,0,0,0,0]
+      //   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+      //   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+      //   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+      //   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+      //   ]
+      
+      function keyPush(event){
+        switch(event.keyCode){
+          case 37:
+            x_velocity = -1;
+            y_velocity = 0;
+            break;
+          case 38:
+            x_velocity = 0;
+            y_velocity = -1;
+            break;
+          case 39:
+            x_velocity = 1;
+            y_velocity = 0;
+            break;
+          case 40:
+            x_velocity = 0;
+            y_velocity = 1;
+            break;
+        }
+      }
+      
+      // GLOBAL VARIABLES
+      snake_x = snake_y = 10;
+      grid_size = tile_count = 20
+      apple_x = apple_y = 15
+      // no movement in the beggining
+      x_velocity = y_velocity = 0
+      trail = []
+      tail = 5;
+      
+      function game(){
+        // Snake Movement
+        snake_x += x_velocity;
+        snake_y += y_velocity;
+          
+        // Make the canvas Black Color
+        ctx.fillStyle = "black"
+        ctx.fillRect(0,0,canvas.width, canvas.height);
+          
+        // Make the apple red
+        ctx.fillStyle = "red";
+        ctx.fillRect(apple_x * grid_size, apple_y * grid_size,grid_size-2,grid_size-2)
+          
+        // Make the snake
+        ctx.fillStyle = "lime";
+        for(var i = 0; i < trail.length; i++){
+            ctx.fillRect (trail[i].x * grid_size, trail[i].y * grid_size, grid_size-2, grid_size-2);
+            
+            // if any part of the trail[i] aka snake body touches the snakes
+            // current position then set the tail back to 5
+            if (trail[i].x == snake_x && trail[i].y == snake_y){
+                tail = 5
+            }
+            
+        }
+          
+          // this will push the current snakes position
+          // so that it can get bigger
+          trail.push({x:snake_x, y: snake_y})
+          
+          // checks if the trail is > than the tail
+          // then remove the head of the trail
+          // if we don't have this line the snake will paint the whole canvas
+          // when we are moving the snake
+          while(trail.length > tail){
+              trail.shift()
+          }
+          
+          // make the tail bigger if we eat a apple
+          if(apple_x == snake_x && apple_y == snake_y){
+              tail ++;
+              apple_x = Math.floor(Math.random() * tile_count)
+              apple_y = Math.floor(Math.random() * tile_count)
+          }
+          
+        // Make the snake wrap the world
+        if(snake_x < 0){
+            // if the snake is too far to the left make it appear to the right
+            snake_x = tile_count 
+        }
+          
+        if(snake_x > tile_count){
+            // move the snake back to the left
+            snake_x = 0
+        }
+          
+        if(snake_y < 0){
+            // if the snake is too far up make it appear on the bottom
+            snake_y = tile_count
+        }
+          
+        if(snake_y > tile_count){
+            // if the snake is too far down move it back up
+            snake_y = 0
+        }
+          
+        
+        
+          
+      }
+      
+    </script>
+  </body>
+</html>
